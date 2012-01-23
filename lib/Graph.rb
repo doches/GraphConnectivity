@@ -29,7 +29,7 @@ class Graph
   end
   
   def edge_between(a,b)
-    return @edges[a.to_sym][b.to_sym]
+    return @edges[a.to_sym].nil? ? [] : @edges[a.to_sym][b.to_sym]
   end
   
   def to_s(human_readable=false)
@@ -53,8 +53,9 @@ class Graph
   
   def to_dot
     str = []
-    str.push "\tnode [color=grey, fontsize=12, fontname=Helvetica];"
+    str.push "\tnode [color=grey, fontsize=12, fontname=Helvetica, fillcolor=white];"
     str.push "\tedge [penwidth=1, color=grey, fontcolor=red, fontname=Helvetica];"
+    str.push "\tgraph [outputorder=edgesfirst];"
     
     str.push "\t"
     
@@ -70,7 +71,15 @@ class Graph
             nodes[label] = true
           end
         end
-        str.push "\t#{@wordmap.reverse_lookup(from)} -- #{@wordmap.reverse_lookup(to)} [weight=#{weight}, penwidth=#{(weight*10).to_i}];"
+        decorate = {}
+        decorate["weight"] = weight
+        decorate["penwidth"] = (weight*10).to_i
+        if decorate["penwidth"] <= 0
+          decorate["penwidth"] = 1
+          decorate["color"] = "grey90"
+        end
+        decorate = decorate.map { |k,v| "#{k}=#{v}" }.join(", ")
+        str.push "\t#{@wordmap.reverse_lookup(from)} -- #{@wordmap.reverse_lookup(to)} [#{decorate}];"
         progress.inc if @use_progressbar
       end
     end
