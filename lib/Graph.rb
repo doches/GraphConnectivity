@@ -9,7 +9,7 @@ class Graph
   attr_accessor :minimal
   
   def initialize(path_to_graph, wordmap)
-    @minimal = false
+    @minimal = true
     @edges = {}
     @wordmap = wordmap
     IO.foreach(path_to_graph) do |line|
@@ -38,7 +38,7 @@ class Graph
     progress = ProgressBar.new("Graph#to_s",@edges.keys.size**2) if @use_progressbar
     @edges.each_pair do |from, list|
       list.each_pair do |to, weight|
-        if @minimal and not seen.include?([from, to])
+        if not @minimal or (@minimal and not seen.include?([from, to]))
           vertices = [from, to]
           vertices.map! { |x| @wordmap.reverse_lookup(x) } if not human_readable
           str.push(vertices + [weight])
@@ -74,12 +74,14 @@ class Graph
         decorate = {}
         decorate["weight"] = weight
         decorate["penwidth"] = (weight*10).to_i
-        if decorate["penwidth"] <= 0
+        if decorate["penwidth"] <= 0 and weight >= 0.05
           decorate["penwidth"] = 1
           decorate["color"] = "grey90"
         end
         decorate = decorate.map { |k,v| "#{k}=#{v}" }.join(", ")
-        str.push "\t#{@wordmap.reverse_lookup(from)} -- #{@wordmap.reverse_lookup(to)} [#{decorate}];"
+        str.push "\t#{@wordmap.reverse_lookup(from)} -- #{@wordmap.reverse_lookup(to)} [#{decorate}];" if not seen.include?([from, to])
+        seen.push [to, from]
+        seen.push [from, to]
         progress.inc if @use_progressbar
       end
     end
