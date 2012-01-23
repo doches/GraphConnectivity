@@ -7,13 +7,21 @@ Exemplars_Per_Category = 10
 
 require 'rubygems'
 require 'wordnet'
+require 'highline/import'
+
+console = HighLine.new(STDIN, STDERR)
 
 yaml = ARGV.shift
 gold = YAML.load_file(yaml)
 
 categories = []
 while not ARGV.empty?
-  categories.push ARGV.shift
+  category = ARGV.shift
+  if gold.keys.include?(category)
+    categories.push category
+  else
+    console.say("Source clustering <%=color('#{yaml}', :yellow)%> doesn't include category <%=color('#{category}',:bold, :red)%>")
+  end
 end
 
 subset = gold.reject { |category,exemplars| not categories.include?(category) }
