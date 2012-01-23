@@ -18,7 +18,7 @@ known_measures = [:shortest_path, :degree, :kpp]
 known_formats = [:dot, :graph, :human_graph]
 
 # Default options
-options = {:measure => :none, :output => :dot, :minimal => false}
+options = {:measure => :none, :output => :dot}
 
 # Parse command-line options
 OptionParser.new do |opts|
@@ -35,9 +35,6 @@ OptionParser.new do |opts|
           "Use measure (#{known_measures.join(', ')}; defaults to #{options[:measure]})") do |m|
     options[:measure] = m
   end
-  
-  # Don't print redundant ( A -- B, B -- A ) edges
-  opts.on("-t", "--trim", "Do not print redundant edges") { |v| options[:minimal] = true }
   
   # Specify the output format (dot, graph, human-readable graph)
   opts.on("-o FORMAT",
