@@ -31,17 +31,26 @@ OptionParser.new do |opts|
   end
 end.parse!
 
+ignore = [$0]
+
 Dir.glob("bin/*.rb").each do |script|
-  bin = File.basename(script).gsub('.rb','')
-  if File.exists?(bin) and options[:clean]
-    say("<%= color('rm',:bold, :red) %> #{bin}") if options[:verbose]
-    `rm #{bin}` if not options[:dry]
-  end
-  if not options[:clean]
-    say("<%= color('chmod',:bold, :green) %> #{script}") if options[:verbose]
-    `chmod +x #{script}` if not options[:dry]
-    say("<%= color('ln',:bold, :green) %> #{script} #{bin}") if options[:verbose]
-    `ln -s #{script} #{bin}` if not options[:dry]
-    puts "" if options[:verbose]
+  if not ignore.include?(script)
+    bin = File.basename(script).gsub('.rb','')
+    if File.exists?(bin)
+      say("<%= color('rm',:bold, :red) %> #{bin}") if options[:verbose]
+      `rm #{bin}` if not options[:dry]
+    end
+    if not options[:clean]
+      say("<%= color('chmod',:bold, :green) %> #{script}") if options[:verbose]
+      `chmod +x #{script}` if not options[:dry]
+      say("<%= color('ln',:bold, :green) %> #{script} #{bin}") if options[:verbose]
+      `ln -s #{script} #{bin}` if not options[:dry]
+      puts "" if options[:verbose]
+    end
+  else
+    if options[:verbose]
+      say("<%= color('ignore', :bold, :yellow) %> #{script}") if not options[:clean]
+      puts ""
+    end
   end
 end
