@@ -3,10 +3,12 @@ class Wordmap
     @wordmap = {}
     @revmap = {}
     IO.foreach(path_to_wordmap) do |line|
-      word,index = *(line.strip.split(/\s+/))
-      word = word.split("_")[0] if word.include?("_")
-      @wordmap[index.to_i] = word.to_sym
-      @revmap[word.to_sym] = index.to_i
+      if line.strip.size > 0
+        word,index = *(line.strip.split(/\s+/))
+        word = word.split("_")[0] if word.include?("_")
+        @wordmap[index.to_i] = word.to_sym
+        @revmap[word.to_sym] = index.to_i
+      end
     end
   end
   
