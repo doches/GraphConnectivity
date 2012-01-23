@@ -60,12 +60,17 @@ class Graph
     
     seen = []
     progress = ProgressBar.new("Graph#to_dot",@edges.keys.size**2) if @use_progressbar
+    nodes = {}
     @edges.each_pair do |from, list|
       list.each_pair do |to, weight|
-#        if not seen.include?("#{from}_#{to}")
-          str.push "\t#{@wordmap.reverse_lookup(from)} -- #{@wordmap.reverse_lookup(to)} [label=\"#{weight}\", weight=#{weight}];"
-#          seen.push "#{to}_#{from}"
-#        end
+        # Make sure we only print node info once per node
+        [from, to].each do |label| 
+          if nodes[label].nil?
+            str.push "\t#{@wordmap.reverse_lookup(label)} [label=\"#{label}\"];"
+            nodes[label] = true
+          end
+        end
+        str.push "\t#{@wordmap.reverse_lookup(from)} -- #{@wordmap.reverse_lookup(to)} [weight=#{weight}, penwidth=#{(weight*10).to_i}];"
         progress.inc if @use_progressbar
       end
     end
