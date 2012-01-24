@@ -14,7 +14,7 @@ known_measures = [:shortest_path, :degree, :kpp]
 options = {:measure => :none, :output => :dot}
 
 # Parse command-line options
-OptionParser.new do |opts|
+parser = OptionParser.new do |opts|
   opts.banner = "Takes a .graph and outputs a reweighted version of the graph"
   opts.separator ""
   opts.separator "Usage: #{$0} file.graph [options] > file2.graph"
@@ -36,7 +36,13 @@ OptionParser.new do |opts|
           "Output re-weighted graph as (#{Graph.formats.join(', ')}; defaults to #{options[:output]})") do |format|
     options[:output] = format
   end
-end.parse!
+end
+parser.parse!
+
+if ARGV.empty?
+  puts parser
+  exit(1)
+end
 
 graph_f = ARGV.shift
 

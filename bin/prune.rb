@@ -45,6 +45,11 @@ end
 
 parser.parse!
 
+if ARGV.empty?
+  puts parser
+  exit(1)
+end
+
 graph_f = ARGV.shift
 
 graph = Graph.new(graph_f)
