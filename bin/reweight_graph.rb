@@ -8,23 +8,16 @@ require 'lib/Wordmap'
 require 'lib/Graph'
 require 'optparse'
 
-graph_f = ARGV.shift
-wordmap_f = graph_f.gsub(/graph$/,"wordmap")
-
-wordmap = Wordmap.new(wordmap_f)
-graph = Graph.new(graph_f, wordmap)
-
 known_measures = [:shortest_path, :degree, :kpp]
-known_formats = [:dot, :graph, :human_graph]
 
 # Default options
 options = {:measure => :none, :output => :dot}
 
 # Parse command-line options
 OptionParser.new do |opts|
-  opts.banner = "Takes a .graph and a .wordmap and outputs a reweighted version of the graph"
+  opts.banner = "Takes a .graph and outputs a reweighted version of the graph"
   opts.separator ""
-  opts.separator "Usage: #{$0} file.graph file.wordmap [options] > file2.graph"
+  opts.separator "Usage: #{$0} file.graph [options] > file2.graph"
   opts.separator ""
   opts.separator "Options:"
   
@@ -35,15 +28,20 @@ OptionParser.new do |opts|
           "Use measure (#{known_measures.join(', ')}; defaults to #{options[:measure]})") do |m|
     options[:measure] = m
   end
-  
+
   # Specify the output format (dot, graph, human-readable graph)
   opts.on("-o FORMAT",
           "--output FORMAT",
-          known_formats,
-          "Output re-weighted graph as (#{known_formats.join(', ')}; defaults to #{options[:output]})") do |format|
+          Graph.formats,
+          "Output re-weighted graph as (#{Graph.formats.join(', ')}; defaults to #{options[:output]})") do |format|
     options[:output] = format
   end
 end.parse!
+
+graph_f = ARGV.shift
+
+graph = Graph.new(graph_f)
+wordmap = graph.wordmap
 
 # Load requested reweighting function
 case options[:measure]
@@ -75,13 +73,4 @@ end
 graph.reweight!
 
 # Output in specified format
-case options[:output]
-  when :dot
-    puts graph.to_dot
-  when :human_graph
-    puts graph.to_s(true)
-  when :graph
-    puts graph.to_s
-  else
-    STDERR.puts "Unknown graph output format \"#{options[:output]}\" specified."
-end
+puts graph.format(options[:output])
