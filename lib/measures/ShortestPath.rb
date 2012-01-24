@@ -1,8 +1,9 @@
 module ShortestPath
   def shortest_path(from, to)
     @shortestpath_cache ||= {}
-    if not @shortestpath_cache[[from, to]].nil?
-      return @shortestpath_cache[[from, to]]
+    ft = "#{from}_#{to}".to_sym
+    if not @shortestpath_cache[ft].nil?
+      return @shortestpath_cache[ft]
     end
     
     path = shortest_path_helper(from, to, [])
@@ -12,16 +13,23 @@ module ShortestPath
       path = path + [[to, last_dist]]
     end
     if not path.nil?
-      @shortestpath_cache[[from, to]] = path
-      @shortestpath_cache[[to, from]] = path.reverse
+      @shortestpath_cache[ft] = path
+      @shortestpath_cache["#{to}_#{from}".to_sym] = path.reverse
     end
     return path
   end
   
   def shortest_path_helper(from, to, progress=nil)
+    STDERR.puts progress.map { |x| x[0] }.join(" -> ")
+    ft = "#{from}_#{to}".to_sym
+    tf = "#{to}_#{from}".to_sym
+    return @shortestpath_cache[ft] if not @shortestpath_cache[ft].nil?
+    return @shortestpath_cache[tf] if not @shortestpath_cache[tf].nil?
     progress ||= []
     return progress if from == to
-    steps = self.edges_from(from).map { |k,v| [k,v] } # e.g. [[:yacht, 0.29], ...]
+    all_edges_from = self.edges_from(from)
+    return nil if all_edges_from.nil?
+    steps = all_edges_from.map { |k,v| [k,v] } # e.g. [[:yacht, 0.29], ...]
     on_path = progress.map { |x| x[0] } + [from]
     steps.reject! { |x| on_path.include?(x[0]) }
     return nil if steps.empty?
@@ -37,11 +45,14 @@ module ShortestPath
   
   def all_shortest_paths
     hash = {}
+    progress = ProgressBar.new("Computing paths",@wordmap.words.size**2) if @use_progressbar
     @wordmap.words.map do |a|
       (@wordmap.words - [a]).map do |b|
         hash[[a,b]] = self.shortest_path(a,b)
+        progress.inc if @use_progressbar
       end
     end
+    progress.finish if @use_progressbar
     return hash
   end
   
