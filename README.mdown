@@ -1,0 +1,1 @@
+The tools in `bin/` can be used to re-weight or prune graphs using a number of easily-extended measures. They also provide some helpful utilities for converting between graph formats, previewing modified graphs with **GraphViz**, or extracting subgraphs.
